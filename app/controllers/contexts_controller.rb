@@ -234,14 +234,18 @@ class ContextsController < ApplicationController
   
   def render_autocomplete
     lambda do
+      # first get active contexts with todos then those without	
+      filled_contexts = @active_contexts.reject { |ctx| ctx.todos.count == 0 } + @hidden_contexts.reject { |ctx| ctx.todos.count == 0 }	
+      empty_contexts = @active_contexts.find_all { |ctx| ctx.todos.count == 0 } + @hidden_contexts.find_all { |ctx| ctx.todos.count == 0 }
+      
       # find contexts and the todos count. use a join to prevent all count(todos) of each context to be fetched
-      context_and_todo_count = current_user.contexts
-      .select('contexts.*, count(todos.id) as todos_count')
-      .joins('left outer join todos on context_id=contexts.id')
-      .group('context_id')
+      #context_and_todo_count = current_user.contexts
+      #.select('contexts.*, count(todos.id) as todos_count')
+      #.joins('left outer join todos on context_id=contexts.id')
+      #.group('context_id')
 
-      filled_contexts = context_and_todo_count.reject { |ctx| ctx.todos.size == 0 } 
-      empty_contexts = context_and_todo_count.find_all { |ctx| ctx.todos.size == 0 } 
+      #filled_contexts = context_and_todo_count.reject { |ctx| ctx.todos.size == 0 } 
+      #empty_contexts = context_and_todo_count.find_all { |ctx| ctx.todos.size == 0 } 
       render :text => for_autocomplete(filled_contexts + empty_contexts, params[:term])
     end
   end
